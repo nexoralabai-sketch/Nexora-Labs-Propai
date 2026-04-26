@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PropAI — AI Chatbot for Real Estate Agencies</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --ink:#0A0A0F;
+  --ink2:#111118;
+  --ink3:#18181F;
+  --ink4:#22222C;
+  --gold:#D4A843;
+  --gold2:#F0C96A;
+  --gold3:rgba(212,168,67,0.12);
+  --white:#F8F4EC;
+  --muted:#7A7A8C;
+  --green:#3ECF8E;
+  --border:rgba(212,168,67,0.15);
+}
+
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink);
+  color:var(--white);
+  font-family:'Outfit',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* CUSTOM CURSOR */
+.cursor{
+  width:10px;height:10px;
+  background:var(--gold);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;
+  z-index:9999;
+  transition:transform 0.15s ease;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  width:36px;height:36px;
+  border:1.5px solid var(--gold);
+  border-radius:50%;
+  position:fixed;top:0;left:0;
+  pointer-events:none;
+  z-index:9998;
+  transition:all 0.12s ease;
+  opacity:0.5;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:22px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,10,15,0.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:'Playfair Display',serif;
+  font-size:22px;font-weight:700;
+  color:var(--gold2);
+  letter-spacing:0.5px;
+}
+.nav-logo span{color:var(--white);font-weight:400;font-style:italic;}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{
+  color:var(--muted);font-size:13.5px;font-weight:400;
+  text-decoration:none;letter-spacing:0.3px;
+  transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{
+  background:var(--gold);color:var(--ink);
+  padding:10px 24px;border-radius:8px;
+  font-size:13px;font-weight:600;
+  text-decoration:none;letter-spacing:0.3px;
+  transition:opacity 0.2s,transform 0.15s;
+  display:inline-block;
+}
+.nav-cta:hover{opacity:0.88;transform:translateY(-1px);}
+
+/* HERO */
+.hero{
+  min-height:100vh;
+  display:flex;align-items:center;
+  padding:140px 48px 80px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 60% at 70% 40%, rgba(212,168,67,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 70%, rgba(212,168,67,0.04) 0%, transparent 60%);
+}
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(212,168,67,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,168,67,0.04) 1px, transparent 1px);
+  background-size:60px 60px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 80%);
+}
+.hero-content{
+  position:relative;z-index:2;
+  max-width:680px;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold3);border:1px solid var(--border);
+  padding:7px 16px;border-radius:30px;
+  font-size:11.5px;font-weight:500;letter-spacing:1px;
+  text-transform:uppercase;color:var(--gold2);
+  margin-bottom:32px;
+  animation:fadeUp 0.6s 0.1s both;
+}
+.hero-tag-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:blink 2s infinite;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(42px, 6vw, 76px);
+  line-height:1.05;
+  font-weight:900;
+  letter-spacing:-1px;
+  margin-bottom:28px;
+  animation:fadeUp 0.6s 0.2s both;
+}
+h1 em{color:var(--gold2);font-style:italic;}
+h1 span{
+  -webkit-text-stroke:1px var(--gold2);
+  color:transparent;
+}
+
+.hero-sub{
+  font-size:17px;color:rgba(248,244,236,0.65);
+  line-height:1.7;font-weight:300;
+  max-width:520px;margin-bottom:44px;
+  animation:fadeUp 0.6s 0.3s both;
+}
+
+.hero-btns{
+  display:flex;gap:16px;flex-wrap:wrap;
+  animation:fadeUp 0.6s 0.4s both;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--gold),#a8721c);
+  color:var(--ink);padding:15px 36px;
+  border-radius:10px;font-size:15px;font-weight:600;
+  text-decoration:none;letter-spacing:0.3px;
+  transition:all 0.2s;display:inline-block;
+  box-shadow:0 8px 30px rgba(212,168,67,0.3);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(212,168,67,0.4);}
+.btn-secondary{
+  border:1px solid var(--border);
+  color:var(--white);padding:15px 36px;
+  border-radius:10px;font-size:15px;font-weight:400;
+  text-decoration:none;letter-spacing:0.3px;
+  transition:all 0.2s;display:inline-block;
+  backdrop-filter:blur(8px);
+}
+.btn-secondary:hover{border-color:var(--gold);color:var(--gold2);}
+
+.hero-stats{
+  display:flex;gap:48px;margin-top:64px;
+  animation:fadeUp 0.6s 0.5s both;
+  padding-top:48px;
+  border-top:1px solid var(--border);
+}
+.stat-num{
+  font-family:'Playfair Display',serif;
+  font-size:36px;font-weight:700;
+  color:var(--gold2);
+}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:0.5px;}
+
+/* HERO VISUAL — floating chat mockup */
+.hero-visual{
+  position:absolute;right:-20px;top:50%;transform:translateY(-50%);
+  width:min(420px, 42vw);
+  animation:floatIn 0.8s 0.5s both, float 6s 1.5s ease-in-out infinite;
+  z-index:2;
+}
+@keyframes floatIn{from{opacity:0;transform:translateY(-40%);} to{opacity:1;transform:translateY(-50%);}}
+@keyframes float{0%,100%{transform:translateY(-50%);}50%{transform:translateY(-52%);}  }
+
+.mock-phone{
+  background:var(--ink2);
+  border:1px solid rgba(212,168,67,0.25);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+}
+.mock-header{
+  background:var(--ink3);
+  padding:14px 18px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(212,168,67,0.1);
+}
+.mock-avatar{
+  width:34px;height:34px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#8B6914);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.mock-name{font-size:13px;font-weight:600;color:var(--gold2);}
+.mock-status{font-size:10px;color:var(--green);display:flex;align-items:center;gap:4px;}
+.mock-dot{width:5px;height:5px;border-radius:50%;background:var(--green);}
+.mock-body{padding:16px;display:flex;flex-direction:column;gap:10px;}
+.mock-bubble{
+  padding:10px 14px;border-radius:12px;
+  font-size:12px;line-height:1.5;max-width:85%;
+}
+.mb-bot{
+  background:var(--ink3);border:1px solid rgba(212,168,67,0.12);
+  color:var(--white);border-bottom-left-radius:3px;
+  align-self:flex-start;
+}
+.mb-user{
+  background:linear-gradient(135deg,var(--gold),#8B6914);
+  color:var(--ink);font-weight:500;
+  border-bottom-right-radius:3px;
+  align-self:flex-end;
+}
+.mock-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.mock-chip{
+  background:var(--ink3);border:1px solid rgba(212,168,67,0.15);
+  color:var(--gold2);font-size:10px;padding:5px 10px;
+  border-radius:20px;
+}
+.mock-input{
+  margin:0 16px 16px;
+  background:var(--ink3);border:1px solid rgba(212,168,67,0.15);
+  border-radius:10px;padding:10px 14px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.mock-placeholder{font-size:11px;color:var(--muted);}
+.mock-send{
+  width:28px;height:28px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),#8B6914);
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+}
+
+/* SECTIONS */
+section{padding:100px 48px;}
+
+/* PROBLEM */
+.problem{
+  background:var(--ink2);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.section-tag{
+  font-size:10.5px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--gold);
+  margin-bottom:16px;
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(32px,4vw,52px);
+  font-weight:700;line-height:1.15;
+  margin-bottom:20px;
+}
+.section-title em{color:var(--gold2);font-style:italic;}
+
+.pain-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:24px;margin-top:52px;
+}
+.pain-card{
+  background:var(--ink3);border:1px solid rgba(255,255,255,0.05);
+  border-radius:16px;padding:28px;
+  transition:border-color 0.2s,transform 0.2s;
+}
+.pain-card:hover{border-color:var(--border);transform:translateY(-3px);}
+.pain-icon{font-size:28px;margin-bottom:16px;}
+.pain-title{font-size:15px;font-weight:600;margin-bottom:8px;color:var(--white);}
+.pain-desc{font-size:13px;color:var(--muted);line-height:1.6;}
+
+/* FEATURES */
+.features-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:2px;margin-top:60px;
+  border:1px solid var(--border);border-radius:20px;overflow:hidden;
+}
+.feat{
+  padding:36px 32px;background:var(--ink2);
+  border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  transition:background 0.2s;
+}
+.feat:hover{background:var(--ink3);}
+.feat-num{
+  font-family:'Playfair Display',serif;
+  font-size:42px;font-weight:900;
+  color:var(--gold3);
+  -webkit-text-stroke:1px rgba(212,168,67,0.25);
+  color:transparent;
+  line-height:1;margin-bottom:16px;
+}
+.feat-title{font-size:16px;font-weight:600;margin-bottom:10px;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.feat-badge{
+  display:inline-block;margin-top:14px;
+  background:var(--gold3);border:1px solid var(--border);
+  color:var(--gold2);font-size:10px;
+  padding:4px 12px;border-radius:20px;letter-spacing:0.5px;
+}
+
+/* PRICING */
+.pricing{background:var(--ink2);}
+.pricing-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:24px;margin-top:56px;max-width:900px;margin-left:auto;margin-right:auto;
+}
+.price-card{
+  background:var(--ink3);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;padding:36px 32px;
+  position:relative;transition:transform 0.2s;
+}
+.price-card:hover{transform:translateY(-4px);}
+.price-card.featured{
+  border-color:var(--gold);
+  background:linear-gradient(145deg,var(--ink3),rgba(212,168,67,0.05));
+  box-shadow:0 20px 60px rgba(212,168,67,0.15);
+}
+.price-pill{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--gold),#a8721c);
+  color:var(--ink);font-size:10px;font-weight:700;
+  padding:5px 18px;border-radius:20px;letter-spacing:0.8px;
+  text-transform:uppercase;white-space:nowrap;
+}
+.price-name{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;}
+.price-amount{
+  font-family:'Playfair Display',serif;
+  font-size:52px;font-weight:700;color:var(--gold2);
+  line-height:1;
+}
+.price-amount sup{font-size:22px;vertical-align:super;}
+.price-period{font-size:13px;color:var(--muted);margin-top:6px;margin-bottom:28px;}
+.price-list{list-style:none;margin-bottom:32px;}
+.price-list li{
+  font-size:13.5px;color:rgba(248,244,236,0.75);
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+  display:flex;align-items:center;gap:10px;
+}
+.price-list li::before{content:"✓";color:var(--gold);font-weight:700;font-size:12px;}
+.price-btn{
+  display:block;text-align:center;
+  background:linear-gradient(135deg,var(--gold),#a8721c);
+  color:var(--ink);padding:13px;border-radius:10px;
+  font-size:14px;font-weight:600;text-decoration:none;
+  transition:opacity 0.2s;
+}
+.price-btn:hover{opacity:0.88;}
+.price-btn.ghost{
+  background:transparent;border:1px solid var(--border);
+  color:var(--white);
+}
+.price-btn.ghost:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* DEMO EMBED */
+.demo-section{text-align:center;}
+.demo-wrap{
+  max-width:480px;margin:56px auto 0;
+  border-radius:24px;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,168,67,0.2);
+  height:580px;
+}
+.demo-wrap iframe{width:100%;height:100%;border:none;}
+
+/* TESTIMONIALS */
+.testi-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:24px;margin-top:56px;
+}
+.testi-card{
+  background:var(--ink2);border:1px solid var(--border);
+  border-radius:16px;padding:28px;
+}
+.testi-stars{color:var(--gold);font-size:14px;margin-bottom:14px;letter-spacing:2px;}
+.testi-text{font-size:14px;color:rgba(248,244,236,0.75);line-height:1.7;margin-bottom:20px;font-style:italic;}
+.testi-author{display:flex;align-items:center;gap:12px;}
+.testi-av{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#8B6914);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.testi-name{font-size:13px;font-weight:600;}
+.testi-role{font-size:11px;color:var(--muted);}
+
+/* CTA SECTION */
+.cta-section{
+  text-align:center;
+  background:linear-gradient(135deg,rgba(212,168,67,0.08),transparent);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.cta-section h2{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(36px,5vw,64px);
+  font-weight:900;line-height:1.1;
+  margin-bottom:20px;
+}
+.cta-section p{font-size:16px;color:var(--muted);margin-bottom:40px;max-width:480px;margin-left:auto;margin-right:auto;}
+
+/* FOOTER */
+footer{
+  padding:40px 48px;
+  border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold2);}
+.footer-copy{font-size:12px;color:var(--muted);}
+
+/* CONTACT FORM */
+.contact-section{max-width:560px;margin:0 auto;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;color:var(--muted);letter-spacing:0.5px;margin-bottom:6px;display:block;}
+.form-input{
+  width:100%;background:var(--ink3);
+  border:1px solid var(--border);border-radius:10px;
+  padding:13px 16px;color:var(--white);
+  font-size:14px;font-family:'Outfit',sans-serif;
+  outline:none;transition:border-color 0.2s;
+}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:var(--muted);}
+textarea.form-input{resize:vertical;min-height:100px;}
+.form-submit{
+  width:100%;
+  background:linear-gradient(135deg,var(--gold),#a8721c);
+  color:var(--ink);border:none;cursor:pointer;
+  padding:15px;border-radius:10px;
+  font-size:15px;font-weight:600;
+  font-family:'Outfit',sans-serif;
+  transition:opacity 0.2s;
+}
+.form-submit:hover{opacity:0.88;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.reveal{
+  opacity:0;transform:translateY(24px);
+  transition:opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero-visual{display:none;}
+  nav{padding:18px 24px;}
+  section{padding:72px 24px;}
+  .hero{padding:120px 24px 60px;}
+  footer{padding:32px 24px;}
+}
+@media(max-width:600px){
+  .hero-stats{flex-wrap:wrap;gap:32px;}
+  .nav-links{display:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Prop<span>AI</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#demo">Live Demo</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Get Your Bot →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">
+      <span class="hero-tag-dot"></span>
+      AI-Powered · Real Estate · 24/7
+    </div>
+
+    <h1>Turn Website<br>Visitors Into<br><em>Qualified Leads</em></h1>
+
+    <p class="hero-sub">PropAI is a premium AI chatbot built exclusively for real estate agencies. It answers property questions, qualifies buyers, and captures leads — automatically, around the clock.</p>
+
+    <div class="hero-btns">
+      <a href="#demo" class="btn-primary">See Live Demo</a>
+      <a href="#pricing" class="btn-secondary">View Pricing</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">3×</div>
+        <div class="stat-label">More leads captured</div>
+      </div>
+      <div>
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">Always available</div>
+      </div>
+      <div>
+        <div class="stat-num">&lt;2s</div>
+        <div class="stat-label">Response time</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING CHAT MOCKUP -->
+  <div class="hero-visual">
+    <div class="mock-phone">
+      <div class="mock-header">
+        <div class="mock-avatar">🏡</div>
+        <div>
+          <div class="mock-name">PropAI Assistant</div>
+          <div class="mock-status"><span class="mock-dot"></span> Online now</div>
+        </div>
+      </div>
+      <div class="mock-body">
+        <div class="mock-bubble mb-bot">Hi 👋 I'm PropAI — your real estate expert. Tell me your budget & location and I'll find your perfect property instantly.</div>
+        <div class="mock-chips">
+          <div class="mock-chip">🏠 Buy</div>
+          <div class="mock-chip">💰 Prices</div>
+          <div class="mock-chip">📅 Viewing</div>
+        </div>
+        <div class="mock-bubble mb-user">Looking for a 3-bed under $400K</div>
+        <div class="mock-bubble mb-bot">Great choice! In that range I have several options in North Side and Riverside. Shall I also send your details to an agent for tailored listings?</div>
+      </div>
+      <div class="mock-input">
+        <span class="mock-placeholder">Ask about any property…</span>
+        <div class="mock-send">➤</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem" id="features">
+  <div class="section-tag reveal">The Problem</div>
+  <h2 class="section-title reveal">Your Agency Is Losing<br><em>Leads Every Night</em></h2>
+  <p style="color:var(--muted);font-size:15px;max-width:520px;line-height:1.7;" class="reveal">
+    Buyers don't wait until 9am. When they can't get answers instantly, they move to your competitor. PropAI fixes that — permanently.
+  </p>
+
+  <div class="pain-grid">
+    <div class="pain-card reveal">
+      <div class="pain-icon">😴</div>
+      <div class="pain-title">Missed after-hours inquiries</div>
+      <div class="pain-desc">60% of property inquiries happen outside business hours. Every unanswered chat is a lost commission.</div>
+    </div>
+    <div class="pain-card reveal">
+      <div class="pain-icon">⏳</div>
+      <div class="pain-title">Agents buried in repetitive questions</div>
+      <div class="pain-desc">"Is it still available?" "What's the price?" PropAI handles 90% of these automatically.</div>
+    </div>
+    <div class="pain-card reveal">
+      <div class="pain-icon">📉</div>
+      <div class="pain-title">No lead capture system</div>
+      <div class="pain-desc">Anonymous visitors leave without a trace. PropAI captures name, phone, and intent before they go.</div>
+    </div>
+    <div class="pain-card reveal">
+      <div class="pain-icon">🐢</div>
+      <div class="pain-title">Slow qualification process</div>
+      <div class="pain-desc">PropAI pre-qualifies buyers by budget and preference so agents only talk to serious prospects.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features2">
+  <div class="section-tag reveal">What You Get</div>
+  <h2 class="section-title reveal">Everything Your Agency<br>Needs, <em>Built-In</em></h2>
+
+  <div class="features-grid">
+    <div class="feat reveal">
+      <div class="feat-num">01</div>
+      <div class="feat-title">Intelligent Real Estate AI</div>
+      <div class="feat-desc">Powered by Claude AI — answers complex questions about buying, selling, mortgages, closing costs, and more with human-level accuracy.</div>
+      <div class="feat-badge">Claude AI Engine</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-num">02</div>
+      <div class="feat-title">Automated Lead Capture</div>
+      <div class="feat-desc">Naturally asks for name, phone, and email mid-conversation. Leads are captured and ready for your CRM or email inbox instantly.</div>
+      <div class="feat-badge">CRM Ready</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-num">03</div>
+      <div class="feat-title">Premium Branded UI</div>
+      <div class="feat-desc">Luxury dark-theme design with your logo and colors. Clients won't believe it's a chatbot — they'll think it's a live agent.</div>
+      <div class="feat-badge">Fully Custom</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-num">04</div>
+      <div class="feat-title">One-Line Website Install</div>
+      <div class="feat-desc">Paste one HTML snippet and PropAI appears on your site instantly. No plugins, no developers, no technical setup needed.</div>
+      <div class="feat-badge">5-Minute Setup</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-num">05</div>
+      <div class="feat-title">Buyer Qualification Flow</div>
+      <div class="feat-desc">Asks about budget, preferred area, property type, and timeline — so agents receive pre-qualified leads, not cold contacts.</div>
+      <div class="feat-badge">Sales Optimized</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-num">06</div>
+      <div class="feat-title">24/7 Availability</div>
+      <div class="feat-desc">Never misses an inquiry. Works on weekends, holidays, and 3am — when motivated buyers are browsing and ready to act.</div>
+      <div class="feat-badge">Always On</div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="demo-section" id="demo" style="background:var(--ink2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="section-tag reveal">Try It Now</div>
+  <h2 class="section-title reveal">This Is <em>Your Bot</em><br>Live & Ready</h2>
+  <p style="color:var(--muted);font-size:15px;line-height:1.7;" class="reveal">
+    The exact bot your agency gets. Ask it a real question — see how it responds.
+  </p>
+  <div class="demo-wrap reveal">
+    <iframe src="real-estate-bot.html" title="PropAI Live Demo"></iframe>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-tag reveal">Results</div>
+  <h2 class="section-title reveal">Agencies That<br><em>Made the Switch</em></h2>
+
+  <div class="testi-grid">
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"We went from losing evening leads to capturing 40+ qualified contacts per week. PropAI paid for itself within the first month."</div>
+      <div class="testi-author">
+        <div class="testi-av">👔</div>
+        <div>
+          <div class="testi-name">Marcus R.</div>
+          <div class="testi-role">Director, Pinnacle Realty Group</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"Our agents used to spend 2 hours a day answering the same questions. Now PropAI handles it. They focus on closing deals instead."</div>
+      <div class="testi-author">
+        <div class="testi-av">👩</div>
+        <div>
+          <div class="testi-name">Sarah K.</div>
+          <div class="testi-role">Branch Manager, Urban Estates</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card reveal">
+      <div class="testi-stars">★★★★★</div>
+      <div class="testi-text">"The design alone is worth it. Clients compliment our website constantly. They think we have a full-time chat team behind it."</div>
+      <div class="testi-author">
+        <div class="testi-av">🧔</div>
+        <div>
+          <div class="testi-name">David L.</div>
+          <div class="testi-role">Owner, Lakeview Properties</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div style="text-align:center;">
+    <div class="section-tag reveal">Simple Pricing</div>
+    <h2 class="section-title reveal">One Bot, <em>Full ROI</em></h2>
+    <p style="color:var(--muted);font-size:15px;margin-top:12px;" class="reveal">No hidden fees. No contracts. Cancel anytime.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="price-card reveal">
+      <div class="price-name">Starter</div>
+      <div class="price-amount"><sup>$</sup>99</div>
+      <div class="price-period">One-time setup</div>
+      <ul class="price-list">
+        <li>Full PropAI chatbot</li>
+        <li>15 trained Q&amp;A topics</li>
+        <li>Lead capture form</li>
+        <li>Website embed code</li>
+        <li>Email support</li>
+      </ul>
+      <a href="#contact" class="price-btn ghost">Get Started</a>
+    </div>
+
+    <div class="price-card featured reveal">
+      <div class="price-pill">Most Popular</div>
+      <div class="price-name">Professional</div>
+      <div class="price-amount"><sup>$</sup>149</div>
+      <div class="price-period">Setup + 1 month support</div>
+      <ul class="price-list">
+        <li>Everything in Starter</li>
+        <li>Custom branding &amp; colors</li>
+        <li>50+ trained Q&amp;A topics</li>
+        <li>CRM lead delivery</li>
+        <li>Priority support</li>
+        <li>1 month free updates</li>
+      </ul>
+      <a href="#contact" class="price-btn">Get Started →</a>
+    </div>
+
+    <div class="price-card reveal">
+      <div class="price-name">Agency</div>
+      <div class="price-amount"><sup>$</sup>299</div>
+      <div class="price-period">Setup + 3 months retainer</div>
+      <ul class="price-list">
+        <li>Everything in Pro</li>
+        <li>Multi-property training</li>
+        <li>WhatsApp integration</li>
+        <li>Monthly performance report</li>
+        <li>Dedicated account manager</li>
+        <li>Quarterly bot optimization</li>
+      </ul>
+      <a href="#contact" class="price-btn ghost">Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="reveal">Ready to <em>Stop<br>Missing Leads?</em></h2>
+  <p class="reveal">Get PropAI on your website this week. Setup takes 24 hours. ROI starts day one.</p>
+  <a href="#contact" class="btn-primary reveal">Get Your Bot Now →</a>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div style="text-align:center;margin-bottom:52px;">
+    <div class="section-tag reveal">Get Started</div>
+    <h2 class="section-title reveal">Let's Build Your<br><em>PropAI Bot</em></h2>
+  </div>
+  <div class="contact-section reveal">
+    <div class="form-group">
+      <label class="form-label">Your Name</label>
+      <input class="form-input" type="text" placeholder="John Smith" id="cf-name"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Agency Name</label>
+      <input class="form-input" type="text" placeholder="Smith Realty Group" id="cf-agency"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" placeholder="john@smithrealty.com" id="cf-email"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">WhatsApp / Phone</label>
+      <input class="form-input" type="text" placeholder="+1 555 000 0000" id="cf-phone"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Package Interest</label>
+      <select class="form-input" id="cf-package">
+        <option value="">Select a package…</option>
+        <option>Starter — $99</option>
+        <option>Professional — $149 ⭐</option>
+        <option>Agency — $299</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Anything else?</label>
+      <textarea class="form-input" placeholder="Tell me about your agency or any specific requirements…" id="cf-msg"></textarea>
+    </div>
+    <button class="form-submit" onclick="submitContact()">Send My Request →</button>
+    <div id="form-success" style="display:none;text-align:center;margin-top:20px;color:var(--green);font-size:14px;">
+      ✅ Request received! I'll reach out within 24 hours.
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">PropAI</div>
+  <div class="footer-copy">© 2025 PropAI · Premium Real Estate AI Chatbots</div>
+  <a href="#contact" class="nav-cta" style="font-size:12px;padding:8px 18px;">Get Started</a>
+</footer>
+
+<script>
+// CUSTOM CURSOR
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx-5+'px';cursor.style.top=my-5+'px';
+});
+function animRing(){
+  rx+=(mx-rx)*0.12;
+  ry+=(my-ry)*0.12;
+  ring.style.left=rx-18+'px';ring.style.top=ry-18+'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.chip,.price-card,.feat').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cursor.style.transform='scale(2.5)');
+  el.addEventListener('mouseleave',()=>cursor.style.transform='scale(1)');
+});
+
+// SCROLL REVEAL
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');}});
+},{threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+// CONTACT FORM
+function submitContact(){
+  const name=document.getElementById('cf-name').value;
+  const email=document.getElementById('cf-email').value;
+  if(!name||!email){alert('Please enter your name and email.');return;}
+  document.getElementById('form-success').style.display='block';
+  // In production: POST to your webhook / email handler
+  console.log('CONTACT LEAD:',{
+    name,
+    agency:document.getElementById('cf-agency').value,
+    email,
+    phone:document.getElementById('cf-phone').value,
+    pkg:document.getElementById('cf-package').value,
+    msg:document.getElementById('cf-msg').value
+  });
+}
+</script>
+</body>
+</html>
