@@ -848,5 +848,29 @@ function submitContact(){
   });
 }
 </script>
+  
+  <audio id="clickSound" src="Click.mp3" preload="auto"></audio>
+<script>
+(function () {
+  const clickSound = document.getElementById("clickSound");
+
+  function playClickSound() {
+    if (!clickSound) return;
+    clickSound.currentTime = 0;
+    clickSound.volume = 0.4;
+    clickSound.play().catch(() => {});
+  }
+
+  document.addEventListener("click", function (e) {
+    const clickable = e.target.closest(
+      "a, button, [role='button'], input[type='button'], input[type='submit']"
+    );
+
+    if (clickable) {
+      playClickSound();
+    }
+  });
+})();
+</script>
 </body>
 </html>
