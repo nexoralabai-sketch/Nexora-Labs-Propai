@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta property="og:title" content="Nexora Labs — PropAI"/>
+<meta property="og:description" content="AI-powered real estate chatbot. Capture leads 24/7 automatically."/>
+<title>Nexora Labs — PropAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A96E;--gold2:#E8D5A3;--gold-dim:rgba(201,169,110,0.1);
+  --dark:#07070F;--dark2:#0C0C1A;--dark3:#111122;
+  --white:#F5F0E8;--muted:#88889A;--green:#3ECF8E;
+}
+html{height:100%;}
+body{min-height:100%;background:var(--dark);font-family:'DM Sans',sans-serif;color:var(--white);overflow-x:hidden;perspective:1000px;}
+
+/* ── 3D CANVAS ── */
+#bg3d{position:fixed;inset:0;z-index:0;}
+
+/* ── GRAIN ── */
+body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.22;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");}
+
+/* ── WRAPPER ── */
+.wrap{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px 90px;}
+
+/* ── HEADER — Apple fade-in ── */
+.header{text-align:center;margin-bottom:60px;}
+.header *{opacity:0;transform:translateY(18px);animation:apIn 1s cubic-bezier(.4,0,.2,1) forwards;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:clamp(42px,7vw,72px);font-weight:700;letter-spacing:0.5px;line-height:1;animation-delay:0.2s;}
+.logo em{color:var(--gold2);font-style:italic;font-weight:400;}
+.logo-rule{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto 0;animation-delay:0.45s;}
+.logo-byline{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-top:10px;animation-delay:0.6s;}
+.tagline{font-size:clamp(13px,1.8vw,16px);color:rgba(245,240,232,0.48);margin-top:16px;line-height:1.7;font-weight:300;max-width:400px;margin-left:auto;margin-right:auto;animation-delay:0.8s;}
+@keyframes apIn{to{opacity:1;transform:translateY(0);}}
+
+/* ── 3D CARD GRID ── */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;max-width:920px;width:100%;
+  opacity:0;animation:apIn 0.9s 1s cubic-bezier(.4,0,.2,1) forwards;}
+@media(max-width:700px){.grid{grid-template-columns:1fr;max-width:360px;gap:16px;}}
+
+/* ── CARD ── */
+.card{
+  position:relative;border-radius:20px;overflow:hidden;
+  cursor:pointer;text-decoration:none;
+  min-height:320px;display:flex;flex-direction:column;justify-content:flex-end;
+  border:1px solid rgba(255,255,255,0.05);
+  /* 3D transform base */
+  transform:perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0);
+  transition:transform 0.5s cubic-bezier(.23,1,.32,1), box-shadow 0.5s cubic-bezier(.23,1,.32,1), border-color 0.4s;
+  will-change:transform;
+}
+/* card hover — 3D tilt + lift */
+.card:hover{
+  transform:perspective(900px) rotateX(-4deg) rotateY(var(--ty,0deg)) translateZ(20px) scale(1.03);
+}
+.card-1{--ty:-3deg;background:radial-gradient(ellipse at 50% 0%,rgba(201,169,110,0.13) 0%,transparent 65%),var(--dark2);}
+.card-1:hover{box-shadow:0 28px 70px rgba(201,169,110,0.18),0 0 0 1px rgba(201,169,110,0.3);}
+.card-1:hover{border-color:rgba(201,169,110,0.3);}
+.card-2{--ty:0deg;background:radial-gradient(ellipse at 50% 0%,rgba(74,144,217,0.11) 0%,transparent 65%),var(--dark2);}
+.card-2:hover{box-shadow:0 28px 70px rgba(74,144,217,0.15),0 0 0 1px rgba(74,144,217,0.3);}
+.card-2:hover{border-color:rgba(74,144,217,0.3);}
+.card-3{--ty:3deg;background:radial-gradient(ellipse at 50% 0%,rgba(62,207,142,0.11) 0%,transparent 65%),var(--dark2);}
+.card-3:hover{box-shadow:0 28px 70px rgba(62,207,142,0.15),0 0 0 1px rgba(62,207,142,0.3);}
+.card-3:hover{border-color:rgba(62,207,142,0.3);}
+
+/* 3D shimmer sweep */
+.card::after{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 40%,rgba(255,255,255,0.03) 50%,transparent 60%);transform:translateX(-100%);transition:transform 0.6s ease;pointer-events:none;z-index:3;}
+.card:hover::after{transform:translateX(100%);}
+
+/* icon area */
+.icon-area{position:absolute;top:0;left:0;right:0;height:195px;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.icon-wrap{width:84px;height:84px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;transition:transform 0.5s cubic-bezier(.23,1,.32,1);}
+.card:hover .icon-wrap{transform:translateY(-8px) scale(1.1);}
+.iw-gold{background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.22);}
+.iw-blue{background:rgba(74,144,217,0.1);border:1px solid rgba(74,144,217,0.22);}
+.iw-green{background:rgba(62,207,142,0.1);border:1px solid rgba(62,207,142,0.22);}
+/* glow ring */
+.icon-wrap::before{content:'';position:absolute;inset:-14px;border-radius:36px;border:1px solid transparent;transition:all 0.5s;}
+.card-1 .icon-wrap::before{border-color:rgba(201,169,110,0.12);}
+.card-2 .icon-wrap::before{border-color:rgba(74,144,217,0.12);}
+.card-3 .icon-wrap::before{border-color:rgba(62,207,142,0.12);}
+.card:hover .icon-wrap::before{inset:-22px;opacity:0;}
+
+/* card body */
+.card-body{position:relative;z-index:2;padding:0 22px 22px;}
+.card-step{font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;}
+.c1s{color:rgba(201,169,110,0.55);}
+.c2s{color:rgba(74,144,217,0.55);}
+.c3s{color:rgba(62,207,142,0.55);}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:clamp(19px,2.4vw,25px);font-weight:700;line-height:1.1;margin-bottom:9px;}
+.c1t{color:var(--gold2);}
+.c2t{color:#8AC4F4;}
+.c3t{color:#6EEDB8;}
+.card-desc{font-size:12px;color:rgba(245,240,232,0.48);line-height:1.6;margin-bottom:18px;font-weight:300;}
+.card-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:30px;font-size:11.5px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all 0.25s;letter-spacing:0.3px;width:100%;}
+.btn-g{background:linear-gradient(135deg,var(--gold),#7A5C1E);color:var(--dark);box-shadow:0 5px 20px rgba(201,169,110,0.25);}
+.btn-b{background:linear-gradient(135deg,#4A90D9,#1E5FA8);color:#fff;box-shadow:0 5px 20px rgba(74,144,217,0.25);}
+.btn-gr{background:linear-gradient(135deg,#3ECF8E,#1A8C5A);color:var(--dark);box-shadow:0 5px 20px rgba(62,207,142,0.25);}
+.card:hover .card-btn{box-shadow:0 8px 28px rgba(0,0,0,0.3);}
+.btn-arrow{font-size:14px;transition:transform 0.25s;}
+.card:hover .btn-arrow{transform:translateX(4px);}
+
+/* badge */
+.cbadge{position:absolute;top:14px;right:14px;z-index:4;padding:4px 10px;border-radius:20px;font-size:8.5px;font-weight:600;letter-spacing:0.7px;text-transform:uppercase;}
+.bg-gold{background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.25);color:var(--gold2);}
+.bg-blue{background:rgba(74,144,217,0.1);border:1px solid rgba(74,144,217,0.22);color:#8AC4F4;}
+.bg-live{background:rgba(62,207,142,0.1);border:1px solid rgba(62,207,142,0.22);color:#6EEDB8;display:flex;align-items:center;gap:4px;}
+.ldot{width:4px;height:4px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s infinite;}
+@keyframes blink{0%,80%,100%{opacity:1;}50%{opacity:0.25;}}
+
+/* ── STATS ── */
+.stats{display:flex;gap:36px;margin-top:52px;justify-content:center;flex-wrap:wrap;opacity:0;animation:apIn 0.9s 1.3s cubic-bezier(.4,0,.2,1) forwards;}
+.stat{text-align:center;}
+.stat-n{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--gold2);}
+.stat-l{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:0.4px;}
+.sdiv{width:1px;background:rgba(255,255,255,0.07);align-self:stretch;}
+
+/* ── FOOTER ── */
+.footer{position:fixed;bottom:0;left:0;right:0;z-index:20;padding:12px 32px;
+  background:linear-gradient(transparent,rgba(7,7,15,0.96));
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.fl-logo{font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gold2);}
+.fl-copy{font-size:10px;color:var(--muted);}
+
+/* ── WA ── */
+#wa{position:fixed;right:20px;bottom:60px;z-index:500;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#25D366,#128C7E);display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 5px 18px rgba(37,211,102,0.35);animation:wap 3s ease-in-out infinite;transition:transform 0.2s;}
+#wa:hover{transform:scale(1.1);}
+#wa svg{width:22px;height:22px;}
+@keyframes wap{0%,100%{box-shadow:0 5px 18px rgba(37,211,102,0.35);}50%{box-shadow:0 5px 24px rgba(37,211,102,0.58),0 0 0 7px rgba(37,211,102,0.06);}}
+.wa-tip{position:fixed;right:76px;bottom:70px;z-index:500;background:rgba(12,12,26,0.95);border:1px solid rgba(37,211,102,0.22);border-radius:8px;padding:7px 12px;font-size:11px;color:var(--white);white-space:nowrap;opacity:0;transform:translateX(8px);transition:all 0.25s;pointer-events:none;}
+#wa:hover+.wa-tip{opacity:1;transform:translateX(0);}
+
+/* ── VIDEO MODAL ── */
+#vmod{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,0.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.4s cubic-bezier(.4,0,.2,1);}
+#vmod.open{opacity:1;pointer-events:all;}
+.vframe{position:relative;width:min(950px,95vw);height:min(550px,90vh);border-radius:18px;overflow:hidden;border:1px solid rgba(201,169,110,0.18);box-shadow:0 40px 100px rgba(0,0,0,0.8);}
+.vframe iframe{width:100%;height:100%;border:none;}
+.vcls{position:absolute;top:-42px;right:0;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.25);color:var(--gold2);padding:7px 16px;border-radius:20px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;}
+.vcls:hover{background:rgba(201,169,110,0.22);}
+</style>
+</head>
+<body>
+
+<canvas id="bg3d"></canvas>
+
+<!-- VIDEO MODAL -->
+<div id="vmod">
+  <div class="vframe">
+    <button class="vcls" onclick="closeVid()">✕ Close</button>
+    <iframe id="viframe" src="" title="PropAI Overview" allow="autoplay"></iframe>
+  </div>
+</div>
+
+<!-- WA -->
+<button id="wa" onclick="openWA()">
+  <svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</button>
+<div class="wa-tip">💬 Chat on WhatsApp</div>
+
+<div class="wrap">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">Nexora <em>Labs</em></div>
+    <div class="logo-rule"></div>
+    <div class="logo-byline">PropAI — AI Real Estate Platform</div>
+    <p class="tagline">The smartest AI chatbot for real estate agencies.<br>Capture leads 24/7 — completely automatically.</p>
+  </div>
+
+  <!-- CARDS -->
+  <div class="grid">
+
+    <!-- CARD 1 -->
+    <div class="card card-1" onclick="openVid()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')openVid()">
+      <div class="cbadge bg-gold">Overview</div>
+      <div class="icon-area"><div class="icon-wrap iw-gold">🎬</div></div>
+      <div class="card-body">
+        <div class="card-step c1s">01 — Watch</div>
+        <div class="card-title c1t">See PropAI<br>in Action</div>
+        <p class="card-desc">A 60-second cinematic overview with voiceover showing exactly what PropAI does for your agency.</p>
+        <button class="card-btn btn-g">▶ &nbsp;Watch Now <span class="btn-arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- CARD 2 -->
+    <a class="card card-2" href="propai-pitch.html" target="_blank" role="button" tabindex="0">
+      <div class="cbadge bg-blue">Full Details</div>
+      <div class="icon-area"><div class="icon-wrap iw-blue">🏢</div></div>
+      <div class="card-body">
+        <div class="card-step c2s">02 — Explore</div>
+        <div class="card-title c2t">About<br>PropAI</div>
+        <p class="card-desc">Features, pricing tiers, client results, and everything you need to know about how PropAI works.</p>
+        <button class="card-btn btn-b">Explore PropAI <span class="btn-arrow">→</span></button>
+      </div>
+    </a>
+
+    <!-- CARD 3 -->
+    <a class="card card-3" href="real-estate-bot.html" target="_blank" role="button" tabindex="0">
+      <div class="cbadge bg-live"><span class="ldot"></span> Live AI</div>
+      <div class="icon-area"><div class="icon-wrap iw-green">🤖</div></div>
+      <div class="card-body">
+        <div class="card-step c3s">03 — Try It</div>
+        <div class="card-title c3t">Meet the<br>AI Agent</div>
+        <p class="card-desc">Chat with PropAI live right now. Ask anything about buying, selling, or pricing — see it respond instantly.</p>
+        <button class="card-btn btn-gr">Chat with PropAI <span class="btn-arrow">→</span></button>
+      </div>
+    </a>
+
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-n">3×</div><div class="stat-l">More leads captured</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n">24/7</div><div class="stat-l">Always available</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n">&lt;2s</div><div class="stat-l">Response time</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n">$149</div><div class="stat-l">Most popular plan</div></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="fl-logo">Nexora Labs</div>
+  <div class="fl-copy">© 2025 Nexora Labs · AI Real Estate Solutions</div>
+</div>
+
+<script>
+const WA_NUM='923174305776';
+const WA_MSG=encodeURIComponent("Hi! I visited the Nexora Labs PropAI page and I'm interested in getting an AI chatbot for my real estate agency. Can you tell me more about the $149 Professional package?");
+function openWA(){window.open(`https://wa.me/${WA_NUM}?text=${WA_MSG}`,'_blank');}
+
+function openVid(){
+  document.getElementById('viframe').src='propai-video.html';
+  document.getElementById('vmod').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeVid(){
+  document.getElementById('vmod').classList.remove('open');
+  setTimeout(()=>{document.getElementById('viframe').src='';},400);
+  document.body.style.overflow='';
+}
+document.getElementById('vmod').addEventListener('click',function(e){if(e.target===this)closeVid();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVid();});
+
+/* ── 3D CANVAS BACKGROUND ── */
+(()=>{
+  const c=document.getElementById('bg3d'),ctx=c.getContext('2d');
+  let W,H;
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  /* stars */
+  const stars=Array.from({length:220},()=>({
+    x:Math.random(),y:Math.random(),z:Math.random(),
+    r:Math.random()*1.2+0.2,
+    a:Math.random()*0.5+0.05,da:0.002+Math.random()*0.003
+  }));
+
+  /* floating orbs */
+  const orbs=[
+    {x:0.15,y:0.25,r:220,hue:38,a:0.055,vx:0.00012,vy:0.00018},
+    {x:0.78,y:0.6,r:280,hue:38,a:0.04,vx:-0.00010,vy:-0.00014},
+    {x:0.5,y:0.85,r:180,hue:210,a:0.04,vx:0.00008,vy:-0.00010},
+    {x:0.9,y:0.1,r:160,hue:145,a:0.035,vx:-0.00012,vy:0.00009}
+  ];
+
+  /* grid lines (3D perspective feel) */
+  function drawGrid(){
+    ctx.save();
+    const vp={x:W/2,y:H*0.62};
+    const cols=12,rows=8,spacing=80;
+    ctx.strokeStyle='rgba(201,169,110,0.04)';
+    ctx.lineWidth=0.8;
+    // horizontal
+    for(let r=0;r<=rows;r++){
+      const y=H*0.55+r*(H*0.5/rows);
+      const spread=(y-vp.y)/(H*0.5)*W*0.6;
+      ctx.beginPath();ctx.moveTo(vp.x-spread,y);ctx.lineTo(vp.x+spread,y);ctx.stroke();
+    }
+    // vertical
+    for(let col=-cols/2;col<=cols/2;col++){
+      ctx.beginPath();
+      ctx.moveTo(vp.x,vp.y);
+      const bx=vp.x+col*(W*1.2/cols);
+      ctx.lineTo(bx,H);ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  let mx=0.5,my=0.5;
+  window.addEventListener('mousemove',e=>{mx=e.clientX/W;my=e.clientY/H;});
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+
+    // deep space gradient
+    const bg=ctx.createRadialGradient(W*0.5,H*0.3,0,W*0.5,H*0.3,W*0.8);
+    bg.addColorStop(0,'rgba(14,10,28,0.95)');
+    bg.addColorStop(1,'rgba(7,7,15,0.98)');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+
+    drawGrid();
+
+    // orbs
+    orbs.forEach(o=>{
+      o.x+=o.vx;o.y+=o.vy;
+      if(o.x<-0.1)o.x=1.1;if(o.x>1.1)o.x=-0.1;
+      if(o.y<-0.1)o.y=1.1;if(o.y>1.1)o.y=-0.1;
+      // mouse parallax
+      const px=o.x*W+(mx-0.5)*30;
+      const py=o.y*H+(my-0.5)*20;
+      const g=ctx.createRadialGradient(px,py,0,px,py,o.r);
+      g.addColorStop(0,`hsla(${o.hue},65%,55%,${o.a})`);
+      g.addColorStop(1,`hsla(${o.hue},65%,55%,0)`);
+      ctx.beginPath();ctx.arc(px,py,o.r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    });
+
+    // stars
+    stars.forEach(s=>{
+      s.a+=s.da;if(s.a>0.55||s.a<0.05)s.da=-s.da;
+      // slight parallax offset
+      const sx=s.x*W+(mx-0.5)*s.z*12;
+      const sy=s.y*H+(my-0.5)*s.z*8;
+      ctx.beginPath();ctx.arc(sx,sy,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${s.a})`;ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  /* 3D card tilt on mouse move */
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-0.5;
+      const y=(e.clientY-r.top)/r.height-0.5;
+      const ry=parseFloat(getComputedStyle(card).getPropertyValue('--ty'))||0;
+      card.style.transform=`perspective(900px) rotateX(${-y*10}deg) rotateY(${x*10+ry}deg) translateZ(20px) scale(1.03)`;
+    });
+    card.addEventListener('mouseleave',()=>{
+      card.style.transform='';
+    });
+  });
+})();
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='1')openVid();
+  if(e.key==='2')window.open('propai-pitch.html','_blank');
+  if(e.key==='3')window.open('real-estate-bot.html','_blank');
+});
+</script>
+</body>
+</html>
