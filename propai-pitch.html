@@ -849,27 +849,52 @@ function submitContact(){
 }
 </script>
   
-  <audio id="clickSound" src="Click.mp3" preload="auto"></audio>
-<script>
+ <audio id="sendSound" src="send.mp3" preload="auto"></audio>
+<audio id="typeSound" src="type.mp3" preload="auto"></audio>
+  <script>
 (function () {
-  const clickSound = document.getElementById("clickSound");
 
-  function playClickSound() {
-    if (!clickSound) return;
-    clickSound.currentTime = 0;
-    clickSound.volume = 0.4;
-    clickSound.play().catch(() => {});
+  const sendSound = document.getElementById("sendSound");
+  const typeSound = document.getElementById("typeSound");
+
+  // 🔊 SEND SOUND
+  function playSend() {
+    if (!sendSound) return;
+    sendSound.currentTime = 0;
+    sendSound.volume = 0.5;
+    sendSound.play().catch(() => {});
   }
 
-  document.addEventListener("click", function (e) {
-    const clickable = e.target.closest(
-      "a, button, [role='button'], input[type='button'], input[type='submit']"
-    );
+  // 🔊 TYPING SOUND (throttled)
+  let lastTypeTime = 0;
 
-    if (clickable) {
-      playClickSound();
+  function playType() {
+    const now = Date.now();
+    if (now - lastTypeTime < 120) return; // prevents spam
+
+    lastTypeTime = now;
+
+    if (!typeSound) return;
+    typeSound.currentTime = 0;
+    typeSound.volume = 0.15;
+    typeSound.play().catch(() => {});
+  }
+
+  // 🎯 SEND BUTTON CLICK
+  document.addEventListener("click", function (e) {
+    const sendBtn = e.target.closest(".send-btn, .chat-send, button[type='submit']");
+    if (sendBtn) {
+      playSend();
     }
   });
+
+  // 🎯 TYPING INPUT
+  document.addEventListener("input", function (e) {
+    if (e.target.matches("input, textarea")) {
+      playType();
+    }
+  });
+
 })();
 </script>
 </body>
