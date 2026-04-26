@@ -354,15 +354,28 @@ document.addEventListener('keydown',e=>{
   if(e.key==='3')window.open('real-estate-bot.html','_blank');
 });
 </script>
-  <script>
+  
+<script>
 (function () {
-  const clickSound = document.getElementById("clickSound");
+  let audioCtx;
 
   function playClickSound() {
-    if (!clickSound) return;
-    clickSound.currentTime = 0;
-    clickSound.volume = 0.35;
-    clickSound.play().catch(() => {});
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+
+    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.08);
   }
 
   document.addEventListener("click", function (e) {
