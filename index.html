@@ -354,5 +354,27 @@ document.addEventListener('keydown',e=>{
   if(e.key==='3')window.open('real-estate-bot.html','_blank');
 });
 </script>
+  <script>
+(function () {
+  const clickSound = document.getElementById("clickSound");
+
+  function playClickSound() {
+    if (!clickSound) return;
+    clickSound.currentTime = 0;
+    clickSound.volume = 0.35;
+    clickSound.play().catch(() => {});
+  }
+
+  document.addEventListener("click", function (e) {
+    const clickable = e.target.closest(
+      "a, button, [role='button'], input[type='button'], input[type='submit']"
+    );
+
+    if (clickable) {
+      playClickSound();
+    }
+  });
+})();
+</script>
 </body>
 </html>
